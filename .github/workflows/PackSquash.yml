@@ -1,0 +1,34 @@
+name: PackSquash
+'on':
+  push:
+    tags:
+      - '**'
+jobs:
+  packsquash:
+    name: PackSquash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Squash
+        uses: ComunidadAylas/PackSquash-action@v4
+        with:
+          packsquash_version: v0.4.0
+          options: |
+            pack_directory = '.'
+            output_file_path = '/tmp/Server_Resources.zip'
+      - name: SHA1
+        id: hash
+        run: >-
+          echo "sha1=$(sha1sum /tmp/Server_Resources.zip | cut -d ' ' -f1)" >>
+          $GITHUB_OUTPUT
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: /tmp/Server_Resources.zip
+          body: |
+            ```
+            ${{ steps.hash.outputs.sha1 }}
+            ```
